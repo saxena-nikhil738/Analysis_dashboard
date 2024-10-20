@@ -283,18 +283,20 @@ const AnalysisPage = () => {
           <button onClick={Logout}>Logout</button>
         </div>
         <div className="filters">
-          <h3 style={{ marginRight: "30px" }}>Filters: </h3>
-          <input
-            type="date"
-            // value={startDate}
-            className="input-date"
-            onChange={(e) => selectStartDate(e.target.value)}
-          />
-          <input
-            type="date"
-            className="input-date"
-            onChange={(e) => selectEndDate(e.target.value)}
-          />
+          <p style={{ marginRight: "30px" }}>Filters: </p>
+          <div className="date">
+            <input
+              type="date"
+              // value={startDate}
+              className="input-date"
+              onChange={(e) => selectStartDate(e.target.value)}
+            />
+            <input
+              type="date"
+              className="input-date"
+              onChange={(e) => selectEndDate(e.target.value)}
+            />
+          </div>
 
           <div className="age-gender">
             <div className="form-control">

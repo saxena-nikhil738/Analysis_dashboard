@@ -11,49 +11,44 @@ import {
   LineChart,
   Line,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
-import {
-  TextField,
-  Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 const AnalysisPage = () => {
   const navigate = useNavigate();
   const query = new URLSearchParams(useLocation().search);
 
-  // Initialize state from cookies
-  const [ageFilter, setAgeFilter] = useState(Cookies.get("age") || "");
-  const [genderFilter, setGenderFilter] = useState(Cookies.get("gender") || "");
-  const [startDate, setStartDate] = useState(Cookies.get("startdate") || "");
-  const [endDate, setEndDate] = useState(Cookies.get("enddate") || "");
+  const [ageFilter, setAgeFilter] = useState(query.get("age") || "");
+  const [genderFilter, setGenderFilter] = useState(query.get("gender") || "");
+  const [startDate, setStartDate] = useState(query.get("startdate") || "");
+  const [endDate, setEndDate] = useState(query.get("enddate") || "");
 
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [featureData, setFeatureData] = useState([]);
   const features = ["A", "B", "C", "D", "E", "F"];
+  const [isLoggedin, setIsLoggedin] = useState(null);
 
   // Redirect if not authenticated
   useEffect(() => {
     const username = Cookies.get("username");
     const password = Cookies.get("password");
-
-    console.log("Username:", username); // Debugging check
-    console.log("Password:", password);
+    setIsLoggedin(Math.random());
+    const currentUrl = window.location.href;
 
     if (!username || !password) {
       console.log("Redirecting to /login...");
+      localStorage.setItem("redirectAfterLogin", currentUrl);
       navigate("/login");
     }
-  }, [navigate]);
+  }, [isLoggedin]);
+
+  // const navigate = useNavigate();
 
   // Set preferences function
   const setPreferences = () => {
@@ -240,16 +235,22 @@ const AnalysisPage = () => {
   };
 
   const ClearPreferences = () => {
-    Cookies.remove("age");
-    Cookies.remove("gender");
-    Cookies.remove("startdate");
-    Cookies.remove("enddate");
+    console.log("Clearing preferences...");
+
+    // Assuming cookies were set on the root path "/"
+    Cookies.remove("age", { path: "/" });
+    Cookies.remove("gender", { path: "/" });
+    Cookies.remove("startdate", { path: "/" });
+    Cookies.remove("enddate", { path: "/" });
+
+    toast.success("Preferences cleared", { autoClose: 1000 });
   };
+
   const Logout = () => {
     console.log("object");
     Cookies.remove("username");
     Cookies.remove("password");
-    ClearPreferences();
+    toast.error("Logged out!", { autoClose: 1000 });
     navigate("/login");
   };
 
@@ -273,22 +274,14 @@ const AnalysisPage = () => {
     setGenderFilter(e.target.value); // This will trigger useEffect
   };
 
-  const showData = () => {
-    console.log(ageFilter);
-    console.log(genderFilter);
-    console.log(startDate);
-    console.log(endDate);
-  };
-
-  // Assuming filteredData is already available in your component
-
   return (
     <>
-      {/* <DynamicBarChart /> */}
-      <div style={{ padding: "20px" }}>
-        <h1>Product Analytics Dashboard</h1>
-        <Button onClick={Logout}>Logout</Button>
-        <Button onClick={ClearPreferences}>Remove Preferences</Button>
+      <div>
+        <p className="head">Product Analytics Dashboard</p>
+        <div className="btns">
+          <button onClick={ClearPreferences}>Clear Preferences</button>
+          <button onClick={Logout}>Logout</button>
+        </div>
         <div className="filters">
           <h3 style={{ marginRight: "30px" }}>Filters: </h3>
           <input
@@ -303,24 +296,26 @@ const AnalysisPage = () => {
             onChange={(e) => selectEndDate(e.target.value)}
           />
 
-          <div className="form-control">
-            <FormControl className="select-control">
-              <InputLabel>Age Group</InputLabel>
-              <Select value={ageFilter} onChange={(e) => selectAge(e)}>
-                <MenuItem value="15-25">15-25</MenuItem>
-                <MenuItem value=">25">{"> "}25</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
+          <div className="age-gender">
+            <div className="form-control">
+              <FormControl className="select-control">
+                <InputLabel>Age Group</InputLabel>
+                <Select value={ageFilter} onChange={(e) => selectAge(e)}>
+                  <MenuItem value="15-25">15-25</MenuItem>
+                  <MenuItem value=">25">{"> "}25</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
 
-          <div className="form-control">
-            <FormControl className="select-control">
-              <InputLabel>Gender</InputLabel>
-              <Select value={genderFilter} onChange={(e) => selectGender(e)}>
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
-              </Select>
-            </FormControl>
+            <div className="form-control">
+              <FormControl className="select-control">
+                <InputLabel>Gender</InputLabel>
+                <Select value={genderFilter} onChange={(e) => selectGender(e)}>
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
           </div>
         </div>
 
@@ -351,50 +346,55 @@ const AnalysisPage = () => {
           )}
         </div>
 
-        <h3>Total Time Spent by Features</h3>
-        <BarChart width={1000} height={400} layout="vertical" data={summedData}>
-          <CartesianGrid strokeDasharray="3 5" />
+        <div className="bar-chart">
+          <p>Total Time Spent by Features</p>
+          <BarChart
+            width={1000}
+            height={400}
+            layout="vertical"
+            data={summedData}
+          >
+            <CartesianGrid strokeDasharray="3 5" />
 
-          {/* X-axis with title */}
-          <XAxis
-            type="number"
-            label={{
-              value: "Sum of Features",
-              position: "insideBottom", // Adjusted position
-              offset: 50, // Increased offset to create more gap
-            }}
-          />
+            {/* X-axis with title */}
+            <XAxis
+              type="number"
+              label={{
+                value: "Sum of Features",
+                position: "insideBottom", // Adjusted position
+                offset: 50, // Increased offset to create more gap
+              }}
+            />
 
-          {/* Y-axis with title */}
-          <YAxis
-            dataKey="name"
-            type="category"
-            label={{
-              value: "Features",
-              angle: -90,
-              position: "insideLeft",
-              dy: 50,
-            }}
-          />
+            <YAxis
+              dataKey="name"
+              type="category"
+              label={{
+                value: "Features",
+                angle: -90,
+                position: "insideLeft",
+                dy: 50,
+              }}
+            />
 
-          <Tooltip />
+            <Tooltip />
 
-          {/* Render a single bar that shows the sum for each feature */}
-          <Bar
-            className="bar"
-            dataKey="sum"
-            fill="#8884d8"
-            barSize={30}
-            onClick={(data) => handleBarClick(data)}
-            style={{ cursor: "pointer" }} // Click handler for individual bars
-          />
-        </BarChart>
+            <Bar
+              className="bar"
+              dataKey="sum"
+              fill="#8884d8"
+              barSize={30}
+              onClick={(data) => handleBarClick(data)}
+              style={{ cursor: "pointer" }} // Click handler for individual bars
+            />
+          </BarChart>
+        </div>
 
         {selectedFeature && (
           <>
-            <h3>{`Time Trend for Feature ${selectedFeature}`}</h3>
+            <div className="bar-chart">
+              <p>{`Time Trend for Feature ${selectedFeature}`}</p>
 
-            <ResponsiveContainer width="100%" height={400}>
               <LineChart
                 width={1000}
                 height={400}
@@ -423,7 +423,7 @@ const AnalysisPage = () => {
                   activeDot={{ r: 8 }}
                 />
               </LineChart>
-            </ResponsiveContainer>
+            </div>
           </>
         )}
       </div>

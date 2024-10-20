@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const localData = JSON.parse(localStorage.getItem("users")) || []; // Parse localStorage data as an array
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,17 +14,37 @@ const Signup = () => {
   const handleSignup = (e) => {
     e.preventDefault();
 
+    // Validate that both username and password fields are filled
     if (username === "" || password === "") {
       setError("Please fill in all fields.");
       return;
     }
 
-    // Save user data in cookies
-    Cookies.set("username", username, { expires: 1 }); // 1-day expiration
-    Cookies.set("password", password, { expires: 1 }); // 1-day expiration
+    // Check if user already exists
+    const userExists = localData.some((user) => user.username === username);
 
-    // Redirect to the home page after signup
-    navigate("/");
+    if (userExists) {
+      // If user exists, show warning and redirect to login page
+      toast.warning("User already exists, please login", { autoClose: 1000 });
+      navigate("/login");
+    } else {
+      // If new user, add to localData
+      const newUser = {
+        username: username,
+        password: password,
+      };
+
+      // Add new user and save updated list to localStorage
+      localData.push(newUser);
+      localStorage.setItem("users", JSON.stringify(localData)); // Store as a JSON string
+
+      // Save user credentials in cookies
+      Cookies.set("username", username, { expires: 1 }); // 1-day expiration
+      Cookies.set("password", password, { expires: 1 }); // 1-day expiration
+
+      // Redirect to home page after signup
+      navigate("/");
+    }
   };
 
   return (

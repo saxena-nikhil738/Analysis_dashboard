@@ -62,11 +62,12 @@
   }
   .applied-filters{
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
-    width: 1010px;
+    width: 1050px;
     align-self: center;
-    margin-left: 10%;
-    border: 1px solid red;
+    border: 1px solid rgb(224, 221, 221);
+    padding: 5px 20px;
   }
   .filter-key{
     display: flex;
@@ -77,4 +78,44 @@
   }
   .filter-key p{
     font-weight: 600;
+  }
+.btns{
+  display: flex;
+  gap: 20px;
+  justify-content: right;
+  margin-bottom: 20px;
+  padding: 5px 50px;
+}
+  button{
+    padding: 10px;
+    font-size: 16px;
+    background: rgb(60, 145, 60);
+    border: none;outline: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+  }
+  .age-gender{
+    display: flex;gap: 10px;
+    align-self: center;
+  }
+  .head{
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    font-style: italic;
+  }
+  .bar-chart{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 60px 50px;
+    width: 90%;
+  }
+  .bar-chart p{
+    font-size: 24px;
+    font-weight: 600;
+    font-style: italic;
+    text-align: center;
   }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,15 +12,30 @@ const Login = () => {
 
   // Check if user is already logged in
   const checkLogin = () => {
-    const storedUsername = Cookies.get("username");
-    const storedPassword = Cookies.get("password");
-    return storedUsername && storedPassword;
+    const localData = JSON.parse(localStorage.getItem("users")) || [];
+
+    // Find user with matching username and password
+    const user = localData.find(
+      (user) => user.username === username && user.password === password
+    );
+
+    if (user) {
+      // If user exists, set cookies and navigate to home page
+      Cookies.set("username", username);
+      Cookies.set("password", password);
+      toast.success("Logged in successfully", { autoClose: 1000 });
+      localStorage.removeItem("redirectAfterLogin");
+      navigate("/");
+    } else {
+      // Show warning if user doesn't exist
+      toast.warning("User does not exist, please signup", { autoClose: 1000 });
+    }
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    if (checkLogin()) {
+    if (checkLogin(username, password)) {
       navigate("/"); // Redirect to home if already logged in
     } else {
       setError("Invalid username or password! Please sign up.");

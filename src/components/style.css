@@ -119,3 +119,39 @@
     font-style: italic;
     text-align: center;
   }
+
+@media (max-width: 768px) {
+    .btns{
+      justify-content: center;
+    }
+    .recharts-cartesian-grid{
+      width: 200px;
+    }
+    .filters{
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+    .date{
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .filters p{
+      display: none;
+    }
+    .age-gender{
+      display: flex;
+      flex-direction: column;
+    }
+    .applied-filters{
+      width: 100%;
+      display: flex;
+    }
+    .filter-key{
+      width: 180px;
+      gap: 5px;
+    }
+}
